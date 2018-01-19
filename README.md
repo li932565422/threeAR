@@ -1,2 +1,2 @@
 # threeAR
-[demo](https://li932565422.github.io/threeAR/ThreeAR/AR_three.html)
+[demo](https://li932565422.github.io/threeAR/Three_AR/AR_three.html)
