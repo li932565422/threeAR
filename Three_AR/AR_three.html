@@ -171,11 +171,12 @@ var loader = new THREE.ColladaLoader();
 		} );
 
 		dae.scale.x = dae.scale.y = dae.scale.z = 0.001;
-		dae.rotation.set( 0,Math.PI/2,Math.PI/2);
+		dae.position.y=0.5;
+		// dae.rotation.set( 0,Math.PI/2,Math.PI/2);
 		markerRoot.add( dae );
 		onRenderFcts.push(function(delta){
-			mesh.rotation.x += delta * Math.PI;
-			dae.updateMatrix();
+			mesh.rotation.x += 0.1;
+			// dae.updateMatrix();
 		})
 		
 	} );
