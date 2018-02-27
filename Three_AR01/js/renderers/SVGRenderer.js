@@ -44,12 +44,9 @@ THREE.SVGRenderer = function () {
 	_viewMatrix = new THREE.Matrix4(),
 	_viewProjectionMatrix = new THREE.Matrix4(),
 
-	_svgPathPool = [],
-	_svgNode, _pathCount = 0,
-
-	_currentPath, _currentStyle,
-
-	_quality = 1, _precision = null;
+	_svgPathPool = [], _svgLinePool = [], _svgRectPool = [],
+	_svgNode, _pathCount = 0, _lineCount = 0, _rectCount = 0,
+	_quality = 1;
 
 	this.domElement = _svg;
 
@@ -107,15 +104,11 @@ THREE.SVGRenderer = function () {
 
 	};
 
-	this.setPrecision = function ( precision ) {
-
-		_precision = precision;
-
-	};
-
-	function removeChildNodes() {
+	this.clear = function () {
 
 		_pathCount = 0;
+		_lineCount = 0;
+		_rectCount = 0;
 
 		while ( _svg.childNodes.length > 0 ) {
 
@@ -123,28 +116,7 @@ THREE.SVGRenderer = function () {
 
 		}
 
-	}
-
-	function getSvgColor ( color, opacity ) {
-
-		var arg = Math.floor( color.r * 255 ) + ',' + Math.floor( color.g * 255 ) + ',' + Math.floor( color.b * 255 );
-
-		if ( opacity === undefined || opacity === 1 ) return 'rgb(' + arg + ')';
-
-		return 'rgb(' + arg + '); fill-opacity: ' + opacity;
-
-	}
-
-	function convert ( c ) {
-
-		return _precision !== null ? c.toFixed(_precision) : c;
-
-	}
-
-	this.clear = function () {
-
-		removeChildNodes();
-		_svg.style.backgroundColor = getSvgColor( _clearColor, _clearAlpha );
+		_svg.style.backgroundColor = 'rgba(' + ( ( _clearColor.r * 255 ) | 0 ) + ',' + ( ( _clearColor.g * 255 ) | 0 ) + ',' + ( ( _clearColor.b * 255 ) | 0 ) + ',' + _clearAlpha + ')';
 
 	};
 
@@ -157,23 +129,12 @@ THREE.SVGRenderer = function () {
 
 		}
 
-		var background = scene.background;
-
-		if ( background && background.isColor ) {
-
-			removeChildNodes();
-			_svg.style.backgroundColor = getSvgColor( background );
-
-		} else if ( this.autoClear === true ) {
-
-			this.clear();
-
-		}
+		if ( this.autoClear === true ) this.clear();
 
 		_this.info.render.vertices = 0;
 		_this.info.render.faces = 0;
 
-		_viewMatrix.copy( camera.matrixWorldInverse );
+		_viewMatrix.copy( camera.matrixWorldInverse.getInverse( camera.matrixWorld ) );
 		_viewProjectionMatrix.multiplyMatrices( camera.projectionMatrix, _viewMatrix );
 
 		_renderData = _projector.projectScene( scene, camera, this.sortObjects, this.sortElements );
@@ -183,11 +144,6 @@ THREE.SVGRenderer = function () {
 		_normalViewMatrix.getNormalMatrix( camera.matrixWorldInverse );
 
 		calculateLights( _lights );
-
-		 // reset accumulated path
-
-		_currentPath = '';
-		_currentStyle = '';
 
 		for ( var e = 0, el = _elements.length; e < el; e ++ ) {
 
@@ -248,14 +204,12 @@ THREE.SVGRenderer = function () {
 
 		}
 
-		flushPath(); // just to flush last svg:path
-
 		scene.traverseVisible( function ( object ) {
 
 			 if ( object instanceof THREE.SVGObject ) {
 
 				_vector3.setFromMatrixPosition( object.matrixWorld );
-				_vector3.applyMatrix4( _viewProjectionMatrix );
+				_vector3.applyProjection( _viewProjectionMatrix );
 
 				var x =   _vector3.x * _svgWidthHalf;
 				var y = - _vector3.y * _svgHeightHalf;
@@ -356,39 +310,37 @@ THREE.SVGRenderer = function () {
 		var scaleX = element.scale.x * _svgWidthHalf;
 		var scaleY = element.scale.y * _svgHeightHalf;
 
-		if ( material.isPointsMaterial ) {
-			scaleX *= material.size;
-			scaleY *= material.size;
+		_svgNode = getRectNode( _rectCount ++ );
+
+		_svgNode.setAttribute( 'x', v1.x - ( scaleX * 0.5 ) );
+		_svgNode.setAttribute( 'y', v1.y - ( scaleY * 0.5 ) );
+		_svgNode.setAttribute( 'width', scaleX );
+		_svgNode.setAttribute( 'height', scaleY );
+
+		if ( material instanceof THREE.SpriteMaterial ) {
+
+			_svgNode.setAttribute( 'style', 'fill: ' + material.color.getStyle() );
+
 		}
 
-		var path = 'M' + convert( v1.x - scaleX * 0.5 ) + ',' + convert( v1.y - scaleY * 0.5 ) + 'h' + convert( scaleX ) + 'v' + convert( scaleY ) + 'h' + convert(-scaleX) + 'z';
-		var style = "";
-
-		if ( material.isSpriteMaterial || material.isPointsMaterial ) {
-
-			style = 'fill:' + getSvgColor( material.color, material.opacity );
-
-		}
-
-		addPath( style, path );
+		_svg.appendChild( _svgNode );
 
 	}
 
 	function renderLine( v1, v2, element, material ) {
 
-		var path = 'M' + convert( v1.positionScreen.x ) + ',' + convert( v1.positionScreen.y ) + 'L' + convert( v2.positionScreen.x ) + ',' + convert( v2.positionScreen.y );
+		_svgNode = getLineNode( _lineCount ++ );
 
-		if ( material.isLineBasicMaterial ) {
+		_svgNode.setAttribute( 'x1', v1.positionScreen.x );
+		_svgNode.setAttribute( 'y1', v1.positionScreen.y );
+		_svgNode.setAttribute( 'x2', v2.positionScreen.x );
+		_svgNode.setAttribute( 'y2', v2.positionScreen.y );
 
-			var style = 'fill:none;stroke:' + getSvgColor( material.color, material.opacity ) + ';stroke-width:' + material.linewidth + ';stroke-linecap:' + material.linecap;
+		if ( material instanceof THREE.LineBasicMaterial ) {
 
-			if ( material.isLineDashedMaterial ) {
+			_svgNode.setAttribute( 'style', 'fill: none; stroke: ' + material.color.getStyle() + '; stroke-width: ' + material.linewidth + '; stroke-opacity: ' + material.opacity + '; stroke-linecap: ' + material.linecap + '; stroke-linejoin: ' + material.linejoin );
 
-				style = style + ';stroke-dasharray:' + material.dashSize + "," + material.gapSize;
-
-			}
-
-			addPath( style, path );
+			_svg.appendChild( _svgNode );
 
 		}
 
@@ -399,8 +351,8 @@ THREE.SVGRenderer = function () {
 		_this.info.render.vertices += 3;
 		_this.info.render.faces ++;
 
-		var path = 'M' + convert( v1.positionScreen.x ) + ',' + convert( v1.positionScreen.y ) + 'L' + convert( v2.positionScreen.x ) + ',' + convert( v2.positionScreen.y ) + 'L' + convert( v3.positionScreen.x ) + ',' + convert( v3.positionScreen.y ) + 'z';
-		var style = '';
+		_svgNode = getPathNode( _pathCount ++ );
+		_svgNode.setAttribute( 'd', 'M ' + v1.positionScreen.x + ' ' + v1.positionScreen.y + ' L ' + v2.positionScreen.x + ' ' + v2.positionScreen.y + ' L ' + v3.positionScreen.x + ',' + v3.positionScreen.y + 'z' );
 
 		if ( material instanceof THREE.MeshBasicMaterial ) {
 
@@ -440,48 +392,35 @@ THREE.SVGRenderer = function () {
 
 		if ( material.wireframe ) {
 
-			style = 'fill:none;stroke:' + getSvgColor( _color, material.opacity ) + ';stroke-width:' + material.wireframeLinewidth + ';stroke-linecap:' + material.wireframeLinecap + ';stroke-linejoin:' + material.wireframeLinejoin;
+			_svgNode.setAttribute( 'style', 'fill: none; stroke: ' + _color.getStyle() + '; stroke-width: ' + material.wireframeLinewidth + '; stroke-opacity: ' + material.opacity + '; stroke-linecap: ' + material.wireframeLinecap + '; stroke-linejoin: ' + material.wireframeLinejoin );
 
 		} else {
 
-			style = 'fill:' + getSvgColor( _color, material.opacity );
+			_svgNode.setAttribute( 'style', 'fill: ' + _color.getStyle() + '; fill-opacity: ' + material.opacity );
 
 		}
 
-		addPath( style, path );
+		_svg.appendChild( _svgNode );
 
 	}
 
-	function addPath ( style, path ) {
+	function getLineNode( id ) {
 
-		if ( _currentStyle === style ) {
+		if ( _svgLinePool[ id ] == null ) {
 
-			_currentPath += path
+			_svgLinePool[ id ] = document.createElementNS( 'http://www.w3.org/2000/svg', 'line' );
 
-		} else {
+			if ( _quality == 0 ) {
 
-			flushPath();
+				_svgLinePool[ id ].setAttribute( 'shape-rendering', 'crispEdges' ); //optimizeSpeed
 
-			_currentStyle = style;
-			_currentPath = path;
+			}
 
-		}
-
-	}
-
-	function flushPath() {
-
-		if ( _currentPath ) {
-
-			_svgNode = getPathNode( _pathCount ++ );
-			_svgNode.setAttribute( 'd', _currentPath );
-			_svgNode.setAttribute( 'style', _currentStyle );
-			_svg.appendChild( _svgNode );
+			return _svgLinePool[ id ];
 
 		}
 
-		_currentPath = '';
-		_currentStyle = '';
+		return _svgLinePool[ id ];
 
 	}
 
@@ -502,6 +441,26 @@ THREE.SVGRenderer = function () {
 		}
 
 		return _svgPathPool[ id ];
+
+	}
+
+	function getRectNode( id ) {
+
+		if ( _svgRectPool[ id ] == null ) {
+
+			_svgRectPool[ id ] = document.createElementNS( 'http://www.w3.org/2000/svg', 'rect' );
+
+			if ( _quality == 0 ) {
+
+				_svgRectPool[ id ].setAttribute( 'shape-rendering', 'crispEdges' ); //optimizeSpeed
+
+			}
+
+			return _svgRectPool[ id ];
+
+		}
+
+		return _svgRectPool[ id ];
 
 	}
 

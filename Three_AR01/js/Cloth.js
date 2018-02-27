@@ -101,7 +101,7 @@ Particle.prototype.integrate = function( timesq ) {
 
 var diff = new THREE.Vector3();
 
-function satisfyConstraints( p1, p2, distance ) {
+function satisifyConstraints( p1, p2, distance ) {
 
 	diff.subVectors( p2.position, p1.position );
 	var currentDist = diff.length();
@@ -272,7 +272,7 @@ function simulate( time ) {
 	for ( i = 0; i < il; i ++ ) {
 
 		constraint = constraints[ i ];
-		satisfyConstraints( constraint[ 0 ], constraint[ 1 ], constraint[ 2 ] );
+		satisifyConstraints( constraint[ 0 ], constraint[ 1 ], constraint[ 2 ] );
 
 	}
 
@@ -286,7 +286,7 @@ function simulate( time ) {
 		for ( particles = cloth.particles, i = 0, il = particles.length; i < il; i ++ ) {
 
 			particle = particles[ i ];
-			var pos = particle.position;
+			pos = particle.position;
 			diff.subVectors( pos, ballPosition );
 			if ( diff.length() < ballSize ) {
 

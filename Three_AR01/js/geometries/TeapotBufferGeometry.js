@@ -479,11 +479,9 @@ THREE.TeapotBufferGeometry = function ( size, segments, bottom, lid, body, fitLi
 	var tcoord;
 
 	var sstep, tstep;
-	var vertPerRow;
+	var vertPerRow, eps;
 
-	var s, t, sval, tval, p;
-	var dsval = 0;
-	var dtval = 0;
+	var s, t, sval, tval, p, dsval, dtval;
 
 	var normOut = new THREE.Vector3();
 	var v1, v2, v3, v4;
@@ -531,6 +529,8 @@ THREE.TeapotBufferGeometry = function ( size, segments, bottom, lid, body, fitLi
 	var maxPatches = bottom ? 32 : 28;
 
 	vertPerRow = segments + 1;
+
+	eps = 0.0000001;
 
 	var surfCount = 0;
 

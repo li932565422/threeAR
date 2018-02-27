@@ -24,6 +24,7 @@ THREE.RaytracingRenderer = function ( parameters ) {
 	var maxRecursionDepth = 3;
 
 	var canvasWidth, canvasHeight;
+	var canvasWidthHalf, canvasHeightHalf;
 
 	var clearColor = new THREE.Color( 0x000000 );
 
@@ -73,7 +74,7 @@ THREE.RaytracingRenderer = function ( parameters ) {
 
 				}
 
-			};
+			}
 
 			worker.color = new THREE.Color().setHSL( Math.random() , 0.8, 0.8 ).getHexString();
 			pool.push( worker );
@@ -124,6 +125,9 @@ THREE.RaytracingRenderer = function ( parameters ) {
 
 		canvasWidth = canvas.width;
 		canvasHeight = canvas.height;
+
+		canvasWidthHalf = Math.floor( canvasWidth / 2 );
+		canvasHeightHalf = Math.floor( canvasHeight / 2 );
 
 		context.fillStyle = 'white';
 
@@ -191,7 +195,7 @@ THREE.RaytracingRenderer = function ( parameters ) {
 		mirror: 1,
 		reflectivity: 1,
 		refractionRatio: 1,
-		glass: 1
+		glass: 1,
 
 	};
 

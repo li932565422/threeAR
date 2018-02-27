@@ -86,12 +86,11 @@ function Scene ( type, numObjects, cameraZ, fov, rotationSpeed, clearColor ) {
 	this.scene.add( light );
 
 	this.rotationSpeed = rotationSpeed;
-
-	var defaultMaterial = new THREE.MeshPhongMaterial( { color: 0xffffff, flatShading: true, vertexColors: THREE.VertexColors } );
+	defaultMaterial = new THREE.MeshPhongMaterial( { color: 0xffffff, shading: THREE.FlatShading, vertexColors: THREE.VertexColors } );
 	this.mesh = new THREE.Mesh( generateGeometry( type, numObjects ), defaultMaterial );
 	this.scene.add( this.mesh );
 
-	var renderTargetParameters = { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBFormat, stencilBuffer: false };
+	renderTargetParameters = { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBFormat, stencilBuffer: false };
 	this.fbo = new THREE.WebGLRenderTarget( window.innerWidth, window.innerHeight, renderTargetParameters );
 
 	this.render = function( delta, rtt ) {

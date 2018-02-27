@@ -43,7 +43,7 @@ THREE.PLYLoader.prototype = {
 
 		var scope = this;
 
-		var loader = new THREE.FileLoader( this.manager );
+		var loader = new THREE.XHRLoader( this.manager );
 		loader.setResponseType( 'arraybuffer' );
 		loader.load( url, function ( text ) {
 
@@ -61,6 +61,28 @@ THREE.PLYLoader.prototype = {
 
 	parse: function ( data ) {
 
+		function isASCII( data ) {
+
+			var header = parseHeader( bin2str( data ) );
+			return header.format === 'ascii';
+
+		}
+
+		function bin2str( buf ) {
+
+			var array_buffer = new Uint8Array( buf );
+			var str = '';
+
+			for ( var i = 0; i < buf.byteLength; i ++ ) {
+
+				str += String.fromCharCode( array_buffer[ i ] ); // implicitly assumes little-endian
+
+			}
+
+			return str;
+
+		}
+
 		function parseHeader( data ) {
 
 			var patternHeader = /ply([\s\S]*)end_header\s/;
@@ -70,7 +92,7 @@ THREE.PLYLoader.prototype = {
 
 			if ( result !== null ) {
 
-				headerText = result[ 1 ];
+				headerText = result [ 1 ];
 				headerLength = result[ 0 ].length;
 
 			}
@@ -181,14 +203,14 @@ THREE.PLYLoader.prototype = {
 
 			switch ( type ) {
 
-				case 'char': case 'uchar': case 'short': case 'ushort': case 'int': case 'uint':
-				case 'int8': case 'uint8': case 'int16': case 'uint16': case 'int32': case 'uint32':
+			case 'char': case 'uchar': case 'short': case 'ushort': case 'int': case 'uint':
+			case 'int8': case 'uint8': case 'int16': case 'uint16': case 'int32': case 'uint32':
 
-					return parseInt( n );
+				return parseInt( n );
 
-				case 'float': case 'double': case 'float32': case 'float64':
+			case 'float': case 'double': case 'float32': case 'float64':
 
-					return parseFloat( n );
+				return parseFloat( n );
 
 			}
 
@@ -227,25 +249,27 @@ THREE.PLYLoader.prototype = {
 
 		}
 
-		function parseASCII( data, header ) {
+		function parseASCII( data ) {
 
 			// PLY ascii format specification, as per http://en.wikipedia.org/wiki/PLY_(file_format)
 
 			var buffer = {
-				indices: [],
-				vertices: [],
-				normals: [],
-				uvs: [],
-				colors: []
+				indices : [],
+				vertices : [],
+				normals : [],
+				uvs : [],
+				colors : []
 			};
 
 			var result;
+
+			var header = parseHeader( data );
 
 			var patternBody = /end_header\s([\s\S]*)$/;
 			var body = '';
 			if ( ( result = patternBody.exec( data ) ) !== null ) {
 
-				body = result[ 1 ];
+				body = result [ 1 ];
 
 			}
 
@@ -288,31 +312,26 @@ THREE.PLYLoader.prototype = {
 
 			// mandatory buffer data
 
-			if ( buffer.indices.length > 0 ) {
-
-				geometry.setIndex( buffer.indices );
-
-			}
-
-			geometry.addAttribute( 'position', new THREE.Float32BufferAttribute( buffer.vertices, 3 ) );
+			geometry.setIndex( ( buffer.indices.length > 65535 ? THREE.Uint32Attribute : THREE.Uint16Attribute )( buffer.indices, 1 ) );
+			geometry.addAttribute( 'position', THREE.Float32Attribute( buffer.vertices, 3 ) );
 
 			// optional buffer data
 
 			if ( buffer.normals.length > 0 ) {
 
-				geometry.addAttribute( 'normal', new THREE.Float32BufferAttribute( buffer.normals, 3 ) );
+				geometry.addAttribute( 'normal', THREE.Float32Attribute( buffer.normals, 3 ) );
 
 			}
 
 			if ( buffer.uvs.length > 0 ) {
 
-				geometry.addAttribute( 'uv', new THREE.Float32BufferAttribute( buffer.uvs, 2 ) );
+				geometry.addAttribute( 'uv', THREE.Float32Attribute( buffer.uvs, 2 ) );
 
 			}
 
 			if ( buffer.colors.length > 0 ) {
 
-				geometry.addAttribute( 'color', new THREE.Float32BufferAttribute( buffer.colors, 3 ) );
+				geometry.addAttribute( 'color', THREE.Float32Attribute( buffer.colors, 3 ) );
 
 			}
 
@@ -422,16 +441,17 @@ THREE.PLYLoader.prototype = {
 
 		}
 
-		function parseBinary( data, header ) {
+		function parseBinary( data ) {
 
 			var buffer = {
-				indices: [],
-				vertices: [],
-				normals: [],
-				uvs: [],
-				colors: []
+				indices : [],
+				vertices : [],
+				normals : [],
+				uvs : [],
+				colors : []
 			};
 
+			var header = parseHeader( bin2str( data ) );
 			var little_endian = ( header.format === 'binary_little_endian' );
 			var body = new DataView( data, header.headerLength );
 			var result, loc = 0;
@@ -461,14 +481,11 @@ THREE.PLYLoader.prototype = {
 
 		if ( data instanceof ArrayBuffer ) {
 
-			var text = THREE.LoaderUtils.decodeText( new Uint8Array( data ) );
-			var header = parseHeader( text );
-
-			geometry = header.format === 'ascii' ? parseASCII( text, header ) : parseBinary( data, header );
+			geometry = isASCII( data ) ? parseASCII( bin2str( data ) ) : parseBinary( data );
 
 		} else {
 
-			geometry = parseASCII( data, parseHeader( data ) );
+			geometry = parseASCII( data );
 
 		}
 
