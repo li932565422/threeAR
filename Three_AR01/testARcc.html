@@ -157,7 +157,7 @@
 
 var loader = new THREE.ColladaLoader();
 			loader.options.convertUpAxis = true;
-			loader.load('./models/monster/monster.dae', function (collada) {
+			loader.load('models/monster/monster.dae', function (collada) {
 				dae = collada.scene;
 				dae.traverse(function (child) {
 					if (child instanceof THREE.SkinnedMesh) {
