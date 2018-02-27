@@ -132,7 +132,7 @@
 	//		add an object in the scene
 	//////////////////////////////////////////////////////////////////////////////////
 
-	var arWorldRoot = smoothedRoot
+	var mesh = new THREE.AxisHelper(),dae;
 
 
 	// add a torus knot	
@@ -156,11 +156,9 @@
 	// 	mesh.rotation.x += 0.1
 	// })
 
-           var dae;
-
 			var loader = new THREE.ColladaLoader();
 			loader.options.convertUpAxis = true;
-			loader.load('models/monster/monster.dae', function (collada) {
+			loader.load('/models/monster/monster.dae', function (collada) {
 				dae = collada.scene;
 				// dae.traverse(function (child) {
 				// 	if (child instanceof THREE.SkinnedMesh) {
@@ -171,7 +169,7 @@
 
 				dae.scale.x = dae.scale.y = dae.scale.z = 0.002;
 				dae.updateMatrix();
-				arWorldRoot.add(dae);
+				markerRoot.add(dae);
 				
 			});
 
