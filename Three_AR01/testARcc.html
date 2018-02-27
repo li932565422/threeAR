@@ -1,18 +1,31 @@
 <!DOCTYPE html>
+<title>测试AR例子</title>
 <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+<!-- <script src="vendor/three.js/customGetUserMediaBar.js"></script> -->
 <!-- three.js library -->
-<script src='vendor/three.js/build/three.min.js'></script>
+<script src='vendor/three.js/build/three.js'></script>
 <script src="vendor/three.js/examples/js/libs/stats.min.js"></script>
 
-	<!-- //obj模型 -->
-
-<script src="js/loaders/OBJLoader.js"></script>
-<script src="js/loaders/ColladaLoader.js"></script>
-<!-- ar.js -->
-<script src="build/ar.js"></script>
+<script src="vendor/three.js/ColladaLoader.js"></script>
+<script src="vendor/three.js/Animation.js"></script>
+<script src="vendor/three.js/AnimationHandler.js"></script>
+<script src="vendor/three.js/KeyFrameAnimation.js"></script>
+<!-- jsartookit -->
+<script src="../vendor/jsartoolkit5/build/artoolkit.min.js"></script>
+<script src="../vendor/jsartoolkit5/js/artoolkit.api.js"></script>
+<!-- include threex.artoolkit -->
+<script src="../threex-artoolkitsource.js"></script>
+<script src="../threex-artoolkitcontext.js"></script>
+<script src="../threex-artoolkitprofile.js"></script>
+<script src="../threex-armarkercontrols.js"></script>
+<script src="../threex-armarkercontrols.js"></script>
 <script>THREEx.ArToolkitContext.baseURL = '../'</script>
 
-<body style='margin : 0px; overflow: hidden; font-family: Monospace;'><div style='position: absolute; top: 10px; width:100%; text-align: center; z-index: 1;'>
+<body style='margin : 0px; overflow: hidden; font-family: Monospace;'><div style='position: absolute; top: 10px; width:100%; text-align: center;z-index:1';>
+	<a href="https://github.com/jeromeetienne/AR.js/" target="_blank">AR.js</a> - developement playground
+	<br/>
+	Contact me any time at <a href='https://twitter.com/jerome_etienne' target='_blank'>@jerome_etienne</a>
 </div><script>
 	//////////////////////////////////////////////////////////////////////////////////
 	//		Init
@@ -24,7 +37,7 @@
 		alpha: true
 	});
 	renderer.setClearColor(new THREE.Color('lightgrey'), 0)
-	// renderer.setPixelRatio( 1/2 );
+	// renderer.setPixelRatio( 2 );
 	renderer.setSize( window.innerWidth, window.innerHeight );
 	renderer.domElement.style.position = 'absolute'
 	renderer.domElement.style.top = '0px'
@@ -36,6 +49,13 @@
 
 	// init scene and camera
 	var scene	= new THREE.Scene();
+
+	var ambient = new THREE.AmbientLight( 0x666666 );
+	scene.add( ambient );
+
+	var directionalLight = new THREE.DirectionalLight( 0x887766 );
+	directionalLight.position.set( -1, 1, 1 ).normalize();
+	scene.add( directionalLight );
 	
 	//////////////////////////////////////////////////////////////////////////////////
 	//		Initialize a basic camera
@@ -52,41 +72,35 @@
 	var arToolkitSource = new THREEx.ArToolkitSource({
 		// to read from the webcam 
 		sourceType : 'webcam',
-
-		// to read from an image
+		
+		// // to read from an image
 		// sourceType : 'image',
-		// sourceUrl : THREEx.ArToolkitContext.baseURL + '../data/images/img.jpg',		
+		// sourceUrl : '../../data/images/img.jpg',		
 
 		// to read from a video
-		// sourceType : 'video',
-		// sourceUrl : THREEx.ArToolkitContext.baseURL + '../data/videos/headtracking.mp4',		
+		//sourceType : 'video',
+		//sourceUrl : '../../data/videos/headtracking.mp4',		
 	})
 
 	arToolkitSource.init(function onReady(){
-		onResize()
+		// handle resize of renderer
+		arToolkitSource.onResize(renderer.domElement)		
 	})
 	
 	// handle resize
 	window.addEventListener('resize', function(){
-		onResize()
+		// handle arToolkitSource resize
+		arToolkitSource.onResize(renderer.domElement)		
 	})
-	function onResize(){
-		arToolkitSource.onResize()	
-		arToolkitSource.copySizeTo(renderer.domElement)	
-		if( arToolkitContext.arController !== null ){
-			arToolkitSource.copySizeTo(arToolkitContext.arController.canvas)	
-		}	
-	}
+
 	////////////////////////////////////////////////////////////////////////////////
 	//          initialize arToolkitContext
-	////////////////////////////////////////////////////////////////////////////////
-	
+	////////////////////////////////////////////////////////////////////////////////	
 
 	// create atToolkitContext
 	var arToolkitContext = new THREEx.ArToolkitContext({
-		cameraParametersUrl: THREEx.ArToolkitContext.baseURL + 'Three_AR01/data/camera_para.dat',
+		cameraParametersUrl: '../../data/data/camera_para.dat',
 		detectionMode: 'mono',
-		maxDetectionRate: 30,
 		canvasWidth: 80*3,
 		canvasHeight: 60*3,
 	})
@@ -112,27 +126,63 @@
 	scene.add(markerRoot)
 	var artoolkitMarker = new THREEx.ArMarkerControls(arToolkitContext, markerRoot, {
 		type : 'pattern',
-		patternUrl : THREEx.ArToolkitContext.baseURL + 'Three_AR01/data/patt.hiro'
-		// patternUrl : THREEx.ArToolkitContext.baseURL + '../data/data/patt.kanji'
+		//patternUrl : '../../data/multi/patt.td',
+		 patternUrl : '../../data/data/patt.hiro',
 	})
 
-	// build a smoothedControls
-	var smoothedRoot = new THREE.Group()
-	scene.add(smoothedRoot)
-	var smoothedControls = new THREEx.ArSmoothedControls(smoothedRoot, {
-		lerpPosition: 0.4,
-		lerpQuaternion: 0.3,
-		lerpScale: 1,
-	})
-	onRenderFcts.push(function(delta){
-		smoothedControls.update(markerRoot)
-	})
 	//////////////////////////////////////////////////////////////////////////////////
 	//		add an object in the scene
 	//////////////////////////////////////////////////////////////////////////////////
 
-	var arWorldRoot = smoothedRoot
 
+	var mesh = new THREE.AxisHelper(),dae;
+	// markerRoot.add(mesh)
+	
+	// ASCII file
+
+	/*var loader = new THREE.STLLoader();
+	loader.load( './models/stl/ttwan.stl', function ( geometry ) {
+
+		var material = new THREE.MeshPhongMaterial( { color: 0xff5533, specular: 0x111111, shininess: 200 } );
+		var mesh = new THREE.Mesh( geometry, material );
+
+		// mesh.position.set( 0, - 0.25, 0.6 );
+		mesh.rotation.set( Math.PI/2,-Math.PI,Math.PI);
+		mesh.scale.set( 1, 1, 1 );
+
+		mesh.castShadow = true;
+		mesh.receiveShadow = true;
+
+		// scene.add( mesh );
+		markerRoot.add( mesh );
+
+	});*/
+	var loader = new THREE.ColladaLoader();
+	loader.options.convertUpAxis = true;
+	loader.load( 'models/monster/monster.dae', function ( collada ) {
+
+		dae = collada.scene;
+
+		dae.traverse( function ( child ) {
+
+			if ( child instanceof THREE.SkinnedMesh ) {
+
+				var animation = new THREE.Animation( child, child.geometry.animation );
+				animation.play();
+
+			}
+
+		} );
+
+		dae.scale.x = dae.scale.y = dae.scale.z = 0.003;
+		dae.rotation.set( 0,Math.PI/2,Math.PI/2);
+		markerRoot.add( dae );
+		onRenderFcts.push(function(delta){
+			mesh.rotation.x += delta * Math.PI;
+			dae.updateMatrix();
+		})
+		
+	} );
 
 	// add a torus knot	
 	// var geometry	= new THREE.CubeGeometry(1,1,1);
@@ -143,39 +193,16 @@
 	// }); 
 	// var mesh	= new THREE.Mesh( geometry, material );
 	// mesh.position.y	= geometry.parameters.height/2
-	// arWorldRoot.add( mesh );
+	// markerRoot.add( mesh );
 	
-	// var geometry	= new THREE.TorusKnotGeometry(0.3,0.1,64,16);
+	// var geometry	= new THREE.TorusKnotGeometry(0.3,0.1,32,32);
 	// var material	= new THREE.MeshNormalMaterial(); 
 	// var mesh	= new THREE.Mesh( geometry, material );
 	// mesh.position.y	= 0.5
-	// arWorldRoot.add( mesh );
-	
-	// onRenderFcts.push(function(){
-	// 	mesh.rotation.x += 0.1
-	// })
+	// markerRoot.add( mesh );
 
-var loader = new THREE.ColladaLoader();
-			loader.options.convertUpAxis = true;
-			loader.load('models/monster/monster.dae', function (collada) {
-				dae = collada.scene;
-				dae.traverse(function (child) {
-					if (child instanceof THREE.SkinnedMesh) {
-						var animation = new THREE.Animation( child, child.geometry.animation);
-						animation.play();
-					}
-				} );
 
-			dae.scale.x = dae.scale.y = dae.scale.z = 0.003;
-		dae.rotation.set( 0,Math.PI/2,Math.PI/2);
-		markerRoot.add( dae );
-		onRenderFcts.push(function(delta){
-			mesh.rotation.x += delta * Math.PI;
-			dae.updateMatrix();
-		})
-		
-	} );
-				
+
 	//////////////////////////////////////////////////////////////////////////////////
 	//		render the whole thing on the page
 	//////////////////////////////////////////////////////////////////////////////////
