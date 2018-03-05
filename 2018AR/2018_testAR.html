@@ -3,7 +3,7 @@
 <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 <!-- three.js library -->
 <script src='vendor/three.js/build/three.js'></script>
-<script src="vendor/three.js/examples/js/libs/stats.min.js"></script>
+<!-- <script src="vendor/three.js/examples/js/libs/stats.min.js"></script> -->
 <script src="vendor/three.js/OBJLoader.js"></script>
 <!-- ar.js -->
 <script src="build/ar.js"></script>
@@ -198,21 +198,27 @@ var manager = new THREE.LoadingManager();
 
 					// object.position.y = -1;
 					// object.position.x = 0;
-					object.rotation.x = -90;
+					// 
+					object.rotation.set(0,Math.PI/2,Math.PI/2);
 					object.scale.x = object.scale.y = object.scale.z = 0.01;
 					arWorldRoot.add( object );
+
+					onRenderFcts.push(function(delta){
+						object.rotation.x+=delta*Math.PI;
+						object.updateMatrix();
+					})
 
 				}, onProgress, onError );
 
 	//////////////////////////////////////////////////////////////////////////////////
 	//		render the whole thing on the page
 	//////////////////////////////////////////////////////////////////////////////////
-	var stats = new Stats();
-	document.body.appendChild( stats.dom );
+	// var stats = new Stats();
+	// document.body.appendChild( stats.dom );
 	// render the scene
 	onRenderFcts.push(function(){
 		renderer.render( scene, camera );
-		stats.update();
+		// stats.update();
 	})
 
 	// run the rendering loop
