@@ -148,7 +148,6 @@
 	// mesh.position.y	= 0.5
 	// arWorldRoot.add( mesh );
 	
-<<<<<<< HEAD
 	// onRenderFcts.push(function(){
 	// 	mesh.rotation.x += 0.1
 	// })
@@ -156,96 +155,55 @@
 	//obj模型
 var manager = new THREE.LoadingManager();
 				manager.onProgress = function ( item, loaded, total ) {
-=======
-// 				var manager = new THREE.LoadingManager();
-// 				manager.onProgress = function ( item, loaded, total ) {
->>>>>>> 89a6000799b4ee91989a72c7228e3c6a595113bb
 
-// 					console.log( item, loaded, total );
+					console.log( item, loaded, total );
 
-// 				};
+				};
 
-// 				var texture = new THREE.Texture();
+				var texture = new THREE.Texture();
 
-// 				var onProgress = function ( xhr ) {
-// 					if ( xhr.lengthComputable ) {
-// 						var percentComplete = xhr.loaded / xhr.total * 100;
-// 						console.log( Math.round(percentComplete, 2) + '% downloaded' );
-// 					}
-// 				};
+				var onProgress = function ( xhr ) {
+					if ( xhr.lengthComputable ) {
+						var percentComplete = xhr.loaded / xhr.total * 100;
+						console.log( Math.round(percentComplete, 2) + '% downloaded' );
+					}
+				};
 
-// 				var onError = function ( xhr ) {
-// 				};
+				var onError = function ( xhr ) {
+				};
 
 
-<<<<<<< HEAD
 				var loader = new THREE.ImageLoader( manager );
 				loader.load( 'obj/male02/orig_02_-_Defaul1noCulling.JPG', function ( image ) {
-=======
-// 				var loader = new THREE.ImageLoader( manager );
-// 				loader.load( 'obj/female02/03_-_Default1noCulling.JPG', function ( image ) {
->>>>>>> 89a6000799b4ee91989a72c7228e3c6a595113bb
 
-// 					texture.image = image;
-// 					texture.needsUpdate = true;
+					texture.image = image;
+					texture.needsUpdate = true;
 
-// 				} );
+				} );
 
-// 				// model
+				// model
 
-<<<<<<< HEAD
 				var loader = new THREE.OBJLoader( manager );
 				loader.load( 'obj/male02/male02.obj', function ( object ) {
-=======
-// 				var loader = new THREE.OBJLoader( manager );
-// 				loader.load( 'obj/female02/female02.obj', function ( object ) {
->>>>>>> 89a6000799b4ee91989a72c7228e3c6a595113bb
 
-// 					object.traverse( function ( child ) {
+					object.traverse( function ( child ) {
 
-// 						if ( child instanceof THREE.Mesh ) {
+						if ( child instanceof THREE.Mesh ) {
 
-// 							child.material.map = texture;
+							child.material.map = texture;
 
-// 						}
+						}
 
-// 					} );
+					} );
 
-<<<<<<< HEAD
 					// object.position.y = -1;
 					// object.position.x = 0;
 					object.rotation.x = -90;
 					object.scale.x = object.scale.y = object.scale.z = 0.01;
 					arWorldRoot.add( object );
-=======
-// 					object.position.y = - 95;
-// 					markerRoot.add( object );
->>>>>>> 89a6000799b4ee91989a72c7228e3c6a595113bb
 
-// 				}, onProgress, onError );
+				}, onProgress, onError );
 
-<<<<<<< HEAD
-=======
-	add a torus knot	
-	var geometry	= new THREE.CubeGeometry(1,1,1);
-	var material	= new THREE.MeshNormalMaterial({
-		transparent : true,
-		opacity: 0.5,
-		side: THREE.DoubleSide
-	}); 
-	var mesh	= new THREE.Mesh( geometry, material );
-	mesh.position.y	= geometry.parameters.height/2
-	markerRoot.add( mesh );
-	
-	var geometry	= new THREE.TorusKnotGeometry(0.3,0.1,32,32);
-	var material	= new THREE.MeshNormalMaterial(); 
-	var mesh	= new THREE.Mesh( geometry, material );
-	mesh.position.y	= 0.5
-	markerRoot.add( mesh );
-
-
-
->>>>>>> 89a6000799b4ee91989a72c7228e3c6a595113bb
 	//////////////////////////////////////////////////////////////////////////////////
 	//		render the whole thing on the page
 	//////////////////////////////////////////////////////////////////////////////////
