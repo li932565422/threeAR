@@ -187,70 +187,70 @@
 
 	//
 	
-				var manager = new THREE.LoadingManager();
-				manager.onProgress = function ( item, loaded, total ) {
+// 				var manager = new THREE.LoadingManager();
+// 				manager.onProgress = function ( item, loaded, total ) {
 
-					console.log( item, loaded, total );
+// 					console.log( item, loaded, total );
 
-				};
+// 				};
 
-				var texture = new THREE.Texture();
+// 				var texture = new THREE.Texture();
 
-				var onProgress = function ( xhr ) {
-					if ( xhr.lengthComputable ) {
-						var percentComplete = xhr.loaded / xhr.total * 100;
-						console.log( Math.round(percentComplete, 2) + '% downloaded' );
-					}
-				};
+// 				var onProgress = function ( xhr ) {
+// 					if ( xhr.lengthComputable ) {
+// 						var percentComplete = xhr.loaded / xhr.total * 100;
+// 						console.log( Math.round(percentComplete, 2) + '% downloaded' );
+// 					}
+// 				};
 
-				var onError = function ( xhr ) {
-				};
+// 				var onError = function ( xhr ) {
+// 				};
 
 
-				var loader = new THREE.ImageLoader( manager );
-				loader.load( 'obj/female02/03_-_Default1noCulling.JPG', function ( image ) {
+// 				var loader = new THREE.ImageLoader( manager );
+// 				loader.load( 'obj/female02/03_-_Default1noCulling.JPG', function ( image ) {
 
-					texture.image = image;
-					texture.needsUpdate = true;
+// 					texture.image = image;
+// 					texture.needsUpdate = true;
 
-				} );
+// 				} );
 
-				// model
+// 				// model
 
-				var loader = new THREE.OBJLoader( manager );
-				loader.load( 'obj/female02/female02.obj', function ( object ) {
+// 				var loader = new THREE.OBJLoader( manager );
+// 				loader.load( 'obj/female02/female02.obj', function ( object ) {
 
-					object.traverse( function ( child ) {
+// 					object.traverse( function ( child ) {
 
-						if ( child instanceof THREE.Mesh ) {
+// 						if ( child instanceof THREE.Mesh ) {
 
-							child.material.map = texture;
+// 							child.material.map = texture;
 
-						}
+// 						}
 
-					} );
+// 					} );
 
-					object.position.y = - 95;
-					markerRoot.add( object );
+// 					object.position.y = - 95;
+// 					markerRoot.add( object );
 
-				}, onProgress, onError );
+// 				}, onProgress, onError );
 
-	// add a torus knot	
-	// var geometry	= new THREE.CubeGeometry(1,1,1);
-	// var material	= new THREE.MeshNormalMaterial({
-	// 	transparent : true,
-	// 	opacity: 0.5,
-	// 	side: THREE.DoubleSide
-	// }); 
-	// var mesh	= new THREE.Mesh( geometry, material );
-	// mesh.position.y	= geometry.parameters.height/2
-	// markerRoot.add( mesh );
+	add a torus knot	
+	var geometry	= new THREE.CubeGeometry(1,1,1);
+	var material	= new THREE.MeshNormalMaterial({
+		transparent : true,
+		opacity: 0.5,
+		side: THREE.DoubleSide
+	}); 
+	var mesh	= new THREE.Mesh( geometry, material );
+	mesh.position.y	= geometry.parameters.height/2
+	markerRoot.add( mesh );
 	
-	// var geometry	= new THREE.TorusKnotGeometry(0.3,0.1,32,32);
-	// var material	= new THREE.MeshNormalMaterial(); 
-	// var mesh	= new THREE.Mesh( geometry, material );
-	// mesh.position.y	= 0.5
-	// markerRoot.add( mesh );
+	var geometry	= new THREE.TorusKnotGeometry(0.3,0.1,32,32);
+	var material	= new THREE.MeshNormalMaterial(); 
+	var mesh	= new THREE.Mesh( geometry, material );
+	mesh.position.y	= 0.5
+	markerRoot.add( mesh );
 
 
 
