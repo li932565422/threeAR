@@ -221,7 +221,7 @@ var manager = new THREE.LoadingManager();
 				}, onProgress, onError );
 
 
-		var controls = new THREE.OrbitControls(camera);
+		var controls = new THREE.OrbitControls(camera,renderer.domElement);
 		
 
 	//////////////////////////////////////////////////////////////////////////////////
