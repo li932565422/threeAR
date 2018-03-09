@@ -1,80 +1,231 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-	<meta charset="utf-8">
-	<title>随便</title>
+<title>2018_testAR</title>
+<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+<!-- three.js library -->
+<script src='vendor/three.js/build/three.js'></script>
+
+ <!--  mmd  -->
+<script src="vendor/three.js/examples/js/libs/charsetencoder.min.js"></script>
+<script src="vendor/three.js/examples/js/libs/ammo.js"></script>
+<script src="vendor/three.js/examples/js/loaders/TGALoader.js"></script>
+<script src="vendor/three.js/examples/js/loaders/MMDLoader.js"></script>
+<script src="vendor/three.js/examples/js/effects/OutlineEffect.js"></script>
+<script src="vendor/three.js/examples/js/animation/CCDIKSolver.js"></script>
+<script src="vendor/three.js/examples/js/animation/MMDPhysics.js"></script>
+
+
+<script src="vendor/three.js/examples/js/controls/OrbitControls.js"></script>
+
+<script src="vendor/three.js/examples/js/Detector.js"></script>
+<script src="vendor/three.js/examples/js/libs/stats.min.js"></script>
+<script src="vendor/three.js/examples/js/libs/dat.gui.min.js"></script>
+<!-- ar.js -->
+<script src="build/ar.js"></script>
+<script src="vendor/three.js/examples/js/controls/OrbitControls.js"></script>
+<script src="vendor/three.js/examples/js/Detector.js"></script>
+<!-- <script src="vendor/three.js/examples/js/stats.min.js"></script> -->
+
+<script>THREEx.ArToolkitContext.baseURL = ''</script>
+
+<body style='margin : 0px; overflow: hidden; font-family: Monospace;'><div style='position: absolute; top: 10px; width:100%; text-align: center; z-index: 1;'>
 	
-</head>
-<body>
-	<script src="build/three.js"></script>
-	<script src="js/loaders/3MFLoader.js"></script>
-	<script src="js/Detector.js"></script>
-	<script src="js/controls/OrbitControls.js"></script>
-	<script src="js/libs/jszip.min.js"></script>
+</div><script>
+	//////////////////////////////////////////////////////////////////////////////////
+	//		Init
+	//////////////////////////////////////////////////////////////////////////////////
+
+	
+	// init renderer
+	var renderer	= new THREE.WebGLRenderer({
+		// antialias	: true,
+		alpha: true
+	});
+	renderer.setClearColor(new THREE.Color('lightgrey'), 0)
+	// renderer.setPixelRatio( 1/2 );
+	renderer.setSize( window.innerWidth, window.innerHeight );
+	renderer.domElement.style.position = 'absolute'
+	renderer.domElement.style.top = '0px'
+	renderer.domElement.style.left = '0px'
+	document.body.appendChild(renderer.domElement);
+
+	// array of functions for the rendering loop
+	var onRenderFcts= [];
+
+	// init scene and camera
+	var scene	= new THREE.Scene();
+	
+	//////////////////////////////////////////////////////////////////////////////////
+	//		Initialize a basic camera
+	//////////////////////////////////////////////////////////////////////////////////
+
+	// Create a camera
+	var camera = new THREE.Camera();
+	camera.lookAt(scene.position);
+	scene.add(camera);
+
+	////////////////////////////////////////////////////////////////////////////////
+	//          handle arToolkitSource
+	////////////////////////////////////////////////////////////////////////////////
+
+	var arToolkitSource = new THREEx.ArToolkitSource({
+		// to read from the webcam 
+		sourceType : 'webcam',
+
+		// to read from an image
+		// sourceType : 'image',
+		// sourceUrl : THREEx.ArToolkitContext.baseURL + '../data/images/img.jpg',		
+
+		// to read from a video
+		// sourceType : 'video',
+		// sourceUrl : THREEx.ArToolkitContext.baseURL + '../data/videos/headtracking.mp4',		
+	})
+
+	arToolkitSource.init(function onReady(){
+		onResize()
+	})
+	
+	// handle resize
+	window.addEventListener('resize', function(){
+		onResize()
+	})
+	function onResize(){
+		arToolkitSource.onResize()	
+		arToolkitSource.copySizeTo(renderer.domElement)	
+		if( arToolkitContext.arController !== null ){
+			arToolkitSource.copySizeTo(arToolkitContext.arController.canvas)	
+		}	
+	}
+	////////////////////////////////////////////////////////////////////////////////
+	//          initialize arToolkitContext
+	////////////////////////////////////////////////////////////////////////////////
 	
 
-	<script>
-		if (!Detector.Webgl)Detector.addGetWebGLMessage();
+	// create atToolkitContext
+	var arToolkitContext = new THREEx.ArToolkitContext({
+		cameraParametersUrl: THREEx.ArToolkitContext.baseURL + 'data/data/camera_para.dat',
+		detectionMode: 'mono',
+		maxDetectionRate: 30,
+		canvasWidth: 80*3,
+		canvasHeight: 60*3,
+	})
+	// initialize it
+	arToolkitContext.init(function onCompleted(){
+		// copy projection matrix to camera
+		camera.projectionMatrix.copy( arToolkitContext.getProjectionMatrix() );
+	})
 
-		var camera, scene, renderer;
+	// update artoolkit on every frame
+	onRenderFcts.push(function(){
+		if( arToolkitSource.ready === false )	return
 
-		init();
-
-		function init(){
-			
-			renderer = new THREE.WebGLRenderer({antialias:true});
-			renderer.setPixelRatio(window.devicePixelRatio);
-			renderer.setSize(window.innerWidth,window.innerHeight);
-			document.body.appendChild(rnederer.domElement);
-
-			scene = new THREE.Scene();
-			scene.background = new THREE.Color(0x333333);
-
-			scene.add(new THREE.AmbientLight(0xffffff,0.2));
-
-			camera = new THREE.PerspectiveCamera(35,window.innerWidth/window.innerHeight,1,500);
-
-
-			camera.up.set(0,0,1);
-			camera.position.set(-80,-90,-150);
-			scene.add(camera);
-
-
-			var controls = new THREE.OrbitControls(camera, renderer.domElement);
-			controls.addEventListener('change',render);
-			controls.minDistace = 50;
-			controls.maxDistance = 300;
-			controls.enablePan = false;
-			controls.target.set(80,65,20);
-			controls.update();
-
-			var pointLight = enw THREE.PontLight(0xffffff,0.8);
-			camera.add(pointLight);
-			var loader = new THREE.ThreeMFLoader();
-			loader.load('./models/3mf/cube_gears.3mf',function(object){
-				scene.add(object);
-				render();
-			});
-
-			window.addEventListener('resize',onWindowResize,false);
-
-		}
-
-		function onWindowResize(){
-			camera.aspect = window.innerWidth/window.innerHeight;
-			camera.updateProjectionMatrix();
-
-			renderer.setSize(window.innerWidth,window.innerHeight);
-			render();
-		}
-
-
-		function render(){
-			rnederer.render(scene,camera);
-		}
-
-
-	</script>
+		arToolkitContext.update( arToolkitSource.domElement )
+	})
 	
+	
+	////////////////////////////////////////////////////////////////////////////////
+	//          Create a ArMarkerControls
+	////////////////////////////////////////////////////////////////////////////////
+	
+	var markerRoot = new THREE.Group
+	scene.add(markerRoot)
+	var artoolkitMarker = new THREEx.ArMarkerControls(arToolkitContext, markerRoot, {
+		type : 'pattern',
+		patternUrl : THREEx.ArToolkitContext.baseURL + 'data/data/patt.hiro'
+		// patternUrl : THREEx.ArToolkitContext.baseURL + '../data/data/patt.kanji'
+	})
+
+	// build a smoothedControls
+	var smoothedRoot = new THREE.Group()
+	scene.add(smoothedRoot)
+	var smoothedControls = new THREEx.ArSmoothedControls(smoothedRoot, {
+		lerpPosition: 0.4,
+		lerpQuaternion: 0.3,
+		lerpScale: 1,
+	})
+	onRenderFcts.push(function(delta){
+		smoothedControls.update(markerRoot)
+	})
+	//////////////////////////////////////////////////////////////////////////////////
+	//		add an object in the scene
+	//////////////////////////////////////////////////////////////////////////////////
+
+	var arWorldRoot = smoothedRoot
+
+	
+
+	// model
+	var helper;
+	var clock = new THREE.Clock();
+
+				var onProgress = function ( xhr ) {
+					if ( xhr.lengthComputable ) {
+						var percentComplete = xhr.loaded / xhr.total * 100;
+						console.log( Math.round(percentComplete, 2) + '% downloaded' );
+					}
+				};
+
+				var onError = function ( xhr ) {
+				};
+
+				var modelFile = 'models/mmd/miku/miku_v2.pmd';
+				var vmdFiles = [ 'models/mmd/vmd/wavefile_v2.vmd' ];
+
+				helper = new THREE.MMDHelper( renderer );
+
+				var loader = new THREE.MMDLoader();
+				loader.setDefaultTexturePath( './models/mmd/default/' );
+
+				loader.load( modelFile, vmdFiles, function ( object ) {
+
+					mesh = object;
+					mesh.position.y = 0 ;
+
+					helper.add( mesh );
+					helper.setAnimation( mesh );
+
+					
+
+
+					mesh.scale.x = mesh.scale.y = mesh.scale.z = 0.1;
+					arWorldRoot.add( mesh );
+
+				}, onProgress, onError );
+
+		// var controls = new THREE.OrbitControls(camera,renderer.domElement);
+		
+
+	//////////////////////////////////////////////////////////////////////////////////
+	//		render the whole thing on the page
+	//////////////////////////////////////////////////////////////////////////////////
+	
+
+	onRenderFcts.push(function(){
+		renderer.render( scene, camera );
+	
+	})
+
+	// run the rendering loop
+	var lastTimeMsec= null
+	requestAnimationFrame(function animate(nowMsec){
+		
+		// keep looping
+		requestAnimationFrame( animate );
+
+		helper.animate( clock.getDelta() );
+		// controls.update();
+	
+		
+		// measure time
+		lastTimeMsec	= lastTimeMsec || nowMsec-1000/60
+		var deltaMsec	= Math.min(200, nowMsec - lastTimeMsec)
+		lastTimeMsec	= nowMsec
+		
+		// call each update function
+		onRenderFcts.forEach(function(onRenderFct){
+			onRenderFct(deltaMsec/1000, nowMsec/1000)
+		})
+	})
+</script>
 </body>
 </html>
