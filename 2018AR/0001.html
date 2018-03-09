@@ -41,10 +41,37 @@
 
 
 			var controls = new THREE.OrbitControls(camera, renderer.domElement);
+			controls.addEventListener('change',render);
+			controls.minDistace = 50;
+			controls.maxDistance = 300;
+			controls.enablePan = false;
+			controls.target.set(80,65,20);
+			controls.update();
 
+			var pointLight = enw THREE.PontLight(0xffffff,0.8);
+			camera.add(pointLight);
+			var loader = new THREE.ThreeMFLoader();
+			loader.load('./models/3mf/cube_gears.3mf',function(object){
+				scene.add(object);
+				render();
+			});
+
+			window.addEventListener('resize',onWindowResize,false);
 
 		}
 
+		function onWindowResize(){
+			camera.aspect = window.innerWidth/window.innerHeight;
+			camera.updateProjectionMatrix();
+
+			renderer.setSize(window.innerWidth,window.innerHeight);
+			render();
+		}
+
+
+		function render(){
+			rnederer.render(scene,camera);
+		}
 
 
 	</script>
