@@ -20,6 +20,8 @@
 	//		Init
 	//////////////////////////////////////////////////////////////////////////////////
 
+	var container;
+	container = document.createElement('div');
 	// init renderer
 	var renderer	= new THREE.WebGLRenderer({
 		// antialias	: true,
@@ -31,7 +33,7 @@
 	renderer.domElement.style.position = 'absolute'
 	renderer.domElement.style.top = '0px'
 	renderer.domElement.style.left = '0px'
-	document.body.appendChild( renderer.domElement );
+	document.body.appendChild( container );
 
 	// array of functions for the rendering loop
 	var onRenderFcts= [];
@@ -211,10 +213,10 @@ var manager = new THREE.LoadingManager();
 
 
 
-					// onRenderFcts.push(function(delta){
-					// 	object.rotation.x+=delta*Math.PI;
-					// 	object.updateMatrix();
-					// })
+					onRenderFcts.push(function(delta){
+						object.rotation.x+=delta*Math.PI;
+						object.updateMatrix();
+					})
 
 				}, onProgress, onError );
 
