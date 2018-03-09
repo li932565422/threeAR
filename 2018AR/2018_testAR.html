@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<html lang="en">
 <title>2018_testAR</title>
 <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 <!-- three.js library -->
@@ -7,6 +8,9 @@
 <script src="vendor/three.js/OBJLoader.js"></script>
 <!-- ar.js -->
 <script src="build/ar.js"></script>
+<script src="vendor/three.js/examples/js/controls/OrbitControls.js"></script>
+<script src="vendor/three.js/examples/js/Detector.js"></script>
+<script src="vendor/three.js/examples/js/stats.min.js"></script>
 <script>THREEx.ArToolkitContext.baseURL = ''</script>
 
 <body style='margin : 0px; overflow: hidden; font-family: Monospace;'><div style='position: absolute; top: 10px; width:100%; text-align: center; z-index: 1;'>
@@ -41,6 +45,7 @@
 
 	// Create a camera
 	var camera = new THREE.Camera();
+	camera.lookAt(scene.position);
 	scene.add(camera);
 
 	////////////////////////////////////////////////////////////////////////////////
@@ -199,40 +204,55 @@ var manager = new THREE.LoadingManager();
 					// object.position.y = -1;
 					// object.position.x = 0;
 					// 
-					object.rotation.set(0,Math.PI/2,Math.PI/2);
+					 object.rotation.set(0,Math.PI/2,Math.PI/2);
 					object.scale.x = object.scale.y = object.scale.z = 0.01;
 					arWorldRoot.add( object );
+					console.log(object.position);
 
-					onRenderFcts.push(function(delta){
-						object.rotation.x+=delta*Math.PI;
-						object.updateMatrix();
-					})
+
+
+					// onRenderFcts.push(function(delta){
+					// 	object.rotation.x+=delta*Math.PI;
+					// 	object.updateMatrix();
+					// })
 
 				}, onProgress, onError );
+
+
+		var controls = new THREE.OrbitControls(camera);
+		
 
 	//////////////////////////////////////////////////////////////////////////////////
 	//		render the whole thing on the page
 	//////////////////////////////////////////////////////////////////////////////////
-	// var stats = new Stats();
-	// document.body.appendChild( stats.dom );
-	// render the scene
+	
+
 	onRenderFcts.push(function(){
 		renderer.render( scene, camera );
-		// stats.update();
+	
 	})
 
 	// run the rendering loop
 	var lastTimeMsec= null
 	requestAnimationFrame(function animate(nowMsec){
+		
 		// keep looping
 		requestAnimationFrame( animate );
+
+		
+		controls.update();
+	
+		
 		// measure time
 		lastTimeMsec	= lastTimeMsec || nowMsec-1000/60
 		var deltaMsec	= Math.min(200, nowMsec - lastTimeMsec)
 		lastTimeMsec	= nowMsec
+		
 		// call each update function
 		onRenderFcts.forEach(function(onRenderFct){
 			onRenderFct(deltaMsec/1000, nowMsec/1000)
 		})
 	})
-</script></body>
+</script>
+</body>
+</html>

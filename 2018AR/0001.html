@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>随便</title>
+	
+</head>
+<body>
+	<script src="build/three.js"></script>
+	<script src="js/loaders/3MFLoader.js"></script>
+	<script src="js/Detector.js"></script>
+	<script src="js/controls/OrbitControls.js"></script>
+	<script src="js/libs/jszip.min.js"></script>
+	
+
+	<script>
+		if (!Detector.Webgl)Detector.addGetWebGLMessage();
+
+		var camera, scene, renderer;
+
+		init();
+
+		function init(){
+			
+			renderer = new THREE.WebGLRenderer({antialias:true});
+			renderer.setPixelRatio(window.devicePixelRatio);
+			renderer.setSize(window.innerWidth,window.innerHeight);
+			document.body.appendChild(rnederer.domElement);
+
+			scene = new THREE.Scene();
+			scene.background = new THREE.Color(0x333333);
+
+			scene.add(new THREE.AmbientLight(0xffffff,0.2));
+
+			camera = new THREE.PerspectiveCamera(35,window.innerWidth/window.innerHeight,1,500);
+
+
+			camera.up.set(0,0,1);
+			camera.position.set(-80,-90,-150);
+			scene.add(camera);
+
+
+			var controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+
+		}
+
+
+
+	</script>
+	
+</body>
+</html>

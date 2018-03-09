@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>fbe_orbit</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+	<style>
+		body{
+			font-family: Monospace;
+			background-color: #000;
+			color: #fff;
+			margin: 0px;
+			overflow: hidden;
+		}
+		#info{
+			color: #fff;
+			position: absolute;
+			top: 10px;
+			width: 100%;
+			text-align: 100;
+			display: block;
+		}
+		#info a,.button{color: #f00; font-weight: bold;text-decoration: underline;cursor: pointer}
+	</style>
+</head>
+<body>
+	<div id="info">
+	</div>
+
+	<script src ="build/three.js"></script>
+	<script src ="js/controls/OrbitControls.js"></script>
+	<script src="js/loaders/FBXLoader.js"></script>
+	<script src="js/Detector.js"></script>
+	<script src="js/libs/stats.min.js"></script>
+
+	<script>
+		if (!Detector.webgl)Detector.addGetWebGLMessage();
+		 var container,stats,controls;
+		 var camera,scene,renderer;
+		 var clock = new THREE.Clock();
+		 var mixers =[];
+
+		 init();
+
+		 function init(){
+		 	container = document.createElement('div');
+		 	document.body.appendChild(container);
+
+		 	camera = new THREE.PerspectiveCamera(45,window.innerWith/window.innerHeight,1,2000);
+
+		 	scene = new THREE.scene();
+
+		 	//帧数状态
+		 	stats = new Stats();
+		 	container.appendChild(stats.dom);
+
+		 	//模型加载
+		 	var manager = new THREE.LoadingManager();
+		 	manager.onProgress =function(item,loaded,total){
+		 		console.log(item,loaded,total);
+		 	};
+
+		 	var onProgress = function(xhr){
+		 		if (xhr.lengthComputable) {
+		 			var percentComplete = xhr.loaded/xhr.total*100;
+		 			console.log(Math.roud(percentComplete,2)+'% downloaded');
+		 		}
+		 	};
+
+		 	var onError = function(xhr){};
+
+		 	var loader = new THREE.FBXLoader(manager);
+		 	loader.load('models/fbx/xsi_man_skinning.fbx',function(object){
+		 		object.traverse(function(child){
+		 			if (child instanceof THREE.Mesh) {
+
+		 			}
+
+		 			if (child instanceof THREE.SkinnedMesh) {
+		 				if (child.geometry.animations !== undefined || child.geometry.morphAnimations !==undefined) {
+
+		 					child.mixer = new THREE.AnimationMixer(child);
+		 					mixers.push(child.mixer);
+		 					var action = child.mixer.clipAction(child.geometry.animations[0]);
+		 					action.play();
+		 				}
+		 			}
+		 		});
+		 		scene.add(object);
+		 	},onProgress,onError);
+
+		 	renderer  = new THREE.WebGLRenderer();
+		 	renderer.setPixelratio(window.devcePixelRatio);
+		 	renderer.setSize(window.innerWith,window.innerHeight);
+		 	renderer.setClearColor(0x000000);
+		 	container.appendChild(renderer.domElement);
+
+		 	controls = new THREE.OrbitControls(camera,renderer.domElement);
+		 	controls.target.set(0,12,0);
+		 	camera.position.set(2,18,28);
+		 	controls.update();
+
+		 	window.addEventListener('resize',onWindowResize,false);
+
+		 	animate();
+
+
+		 }
+
+		 function onWindowResize(){
+		 	camera.aspect = window.innerWith/window.innerHeight;
+		 	camera.updateProjectionMatrix();
+		 	renderer.setSize(window.innerWith,window.innerHeight);
+		 }
+
+		 function animate(){
+		 	renquestAnimationFrame(animate);
+		 	if (mixers.length>0) {
+		 		for(var i = 0; i<mixers.length; i++){
+		 			mixers[i].update(clock.getDelta());
+		 		}
+		 	}
+		 	stats.update();
+		 	render();
+		 }
+
+		 function render(){
+		 	renderer.render(scene, camera);
+		 }
+	</script>
+</body>
+</html>
