@@ -1,5 +1,5 @@
 # threeAR
-[初音]（https://li932565422.github.io/threeAR/2018AR/0001.html）
+[初音](https://li932565422.github.io/threeAR/2018AR/0001.html)
 
 [2018_test](https://li932565422.github.io/threeAR/2018AR/2018_testAR.html)
 
