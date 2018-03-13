@@ -217,7 +217,7 @@
 				}, onProgress, onError );
 
 
-		
+	
 
 	//////////////////////////////////////////////////////////////////////////////////
 	//		render the whole thing on the page
@@ -230,11 +230,15 @@
 	
 	})
 
-	function animate() {
+	// run the rendering loop
+	var lastTimeMsec= null
+	requestAnimationFrame(function animate(nowMsec){
+		
+		// keep looping
+		requestAnimationFrame( animate );
 
-				requestAnimationFrame( animate );
 
-				if ( mixers.length > 0 ) {
+		if ( mixers.length > 0 ) {
 
 					for ( var i = 0; i < mixers.length; i ++ ) {
 
@@ -243,17 +247,6 @@
 					}
 
 				}
-
-				
-				render();
-
-	}
-	// run the rendering loop
-	var lastTimeMsec= null
-	requestAnimationFrame(function animate(nowMsec){
-		
-		// keep looping
-		requestAnimationFrame( animate );
 
 
 		// render();
