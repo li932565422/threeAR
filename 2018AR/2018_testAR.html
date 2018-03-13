@@ -10,7 +10,7 @@
 <script src="build/ar.js"></script>
 <script src="vendor/three.js/examples/js/controls/OrbitControls.js"></script>
 <script src="vendor/three.js/examples/js/Detector.js"></script>
-<script src="vendor/three.js/examples/js/stats.min.js"></script>
+<!-- <script src="vendor/three.js/examples/js/stats.min.js"></script> -->
 <script>THREEx.ArToolkitContext.baseURL = ''</script>
 
 <body style='margin : 0px; overflow: hidden; font-family: Monospace;'><div style='position: absolute; top: 10px; width:100%; text-align: center; z-index: 1;'>
@@ -45,7 +45,7 @@
 	//////////////////////////////////////////////////////////////////////////////////
 
 	// Create a camera
-	var camera = new THREE.Camera();
+	var camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 2000 );
 	camera.lookAt(scene.position);
 	scene.add(camera);
 
@@ -180,7 +180,7 @@ var manager = new THREE.LoadingManager();
 
 
 				var loader = new THREE.ImageLoader( manager );
-				loader.load( 'obj/male02/orig_02_-_Defaul1noCulling.JPG', function ( image ) {
+				loader.load( 'obj/female02/03_-_Default1noCulling.JPG', function ( image ) {
 
 					texture.image = image;
 					texture.needsUpdate = true;
@@ -190,7 +190,7 @@ var manager = new THREE.LoadingManager();
 				// model
 
 				var loader = new THREE.OBJLoader( manager );
-				loader.load( 'obj/male02/male02.obj', function ( object ) {
+				loader.load( 'obj/female02/female02.obj', function ( object ) {
 
 					object.traverse( function ( child ) {
 
@@ -202,25 +202,16 @@ var manager = new THREE.LoadingManager();
 
 					} );
 
-					// object.position.y = -1;
-					// object.position.x = 0;
-					// 
-					 object.rotation.set(0,Math.PI/2,Math.PI/2);
+				
+					 object.rotation.set(0,Math.PI/6,0);
 					object.scale.x = object.scale.y = object.scale.z = 0.01;
 					arWorldRoot.add( object );
-					console.log(object.position);
-
-
-
-					onRenderFcts.push(function(delta){
-						object.rotation.x+=delta*Math.PI;
-						object.updateMatrix();
-					})
+			
 
 				}, onProgress, onError );
 
 
-		// var controls = new THREE.OrbitControls(camera,renderer.domElement);
+		  var controls = new THREE.OrbitControls(camera);
 		
 
 	//////////////////////////////////////////////////////////////////////////////////
@@ -229,10 +220,19 @@ var manager = new THREE.LoadingManager();
 	
 
 	onRenderFcts.push(function(){
+
 		renderer.render( scene, camera );
 	
 	})
 
+		function animate(){
+			requestAnimationFrame(animate);
+			render();
+		}
+
+		function render(){
+			renderer.render(scene,camera);
+		}
 	// run the rendering loop
 	var lastTimeMsec= null
 	requestAnimationFrame(function animate(nowMsec){
@@ -240,8 +240,8 @@ var manager = new THREE.LoadingManager();
 		// keep looping
 		requestAnimationFrame( animate );
 
-		
-		// controls.update();
+
+		// render();
 	
 		
 		// measure time
