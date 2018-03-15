@@ -13,14 +13,21 @@
 <!-- <script src="vendor/three.js/examples/js/stats.min.js"></script> -->
 <script>THREEx.ArToolkitContext.baseURL = ''</script>
 
-<body style='margin : 0px; overflow: hidden; font-family: Monospace;'><div style='position: absolute; top: 10px; width:100%; text-align: center; z-index: 1;'>
+<body style='margin : 0px; overflow: hidden; font-family: Monospace;'>
+	<div style='position: absolute; top: 10px; width:100%; text-align: center; z-index: 1;'>
 	
-</div><script>
+</div>
+
+<script>
 	//////////////////////////////////////////////////////////////////////////////////
 	//		Init
 	//////////////////////////////////////////////////////////////////////////////////
 
-	
+
+
+	var container;
+	container = document.body.createElement('div');
+	document.body.appendChild( container );
 	// init renderer
 	var renderer	= new THREE.WebGLRenderer({
 		// antialias	: true,
@@ -32,7 +39,8 @@
 	renderer.domElement.style.position = 'absolute'
 	renderer.domElement.style.top = '0px'
 	renderer.domElement.style.left = '0px'
-	document.body.appendChild(renderer.domElement);
+	container.appendChild(renderer.domElement);
+	
 
 	// array of functions for the rendering loop
 	var onRenderFcts= [];
@@ -48,6 +56,11 @@
 	var camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 2000 );
 	camera.lookAt(scene.position);
 	scene.add(camera);
+
+	//控制相机
+	var controls = new THREE.OrbitControls(camera);
+
+	controls.update();
 
 	////////////////////////////////////////////////////////////////////////////////
 	//          handle arToolkitSource
@@ -220,7 +233,7 @@
 				}, onProgress, onError );
 
 
-				var controls = new THREE.OrbitControls(camera);
+				
 
 
 	
