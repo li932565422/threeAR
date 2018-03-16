@@ -1171,7 +1171,7 @@ var Qb=[Ik,Zh,_h,Qj,Qi,Pi,Ri,Ag,sg,qg,rg,yg,kh,jh,Oi,Mj];var Rb=[Jk,ki,ji,gi];va
 		  	}
 		};
 
-		if ( false ) {
+		if ( true ) {
 		// if ( navigator.mediaDevices || window.MediaStreamTrack) {
 			if (navigator.mediaDevices) {
 				navigator.mediaDevices.getUserMedia({
@@ -1185,8 +1185,8 @@ var Qb=[Ik,Zh,_h,Qj,Qi,Pi,Ri,Ag,sg,qg,rg,yg,kh,jh,Oi,Mj];var Rb=[Jk,ki,ji,gi];va
 						facingDir = facing.exact;
 					}
 					for (var i=1; i<sources.length; i++) {
-						if (sources[1].kind === 'video' && sources[1].facing === facingDir) {
-							hdConstraints.video.mandatory.sourceId = sources[1].id;
+						if (sources[i].kind === 'video' && sources[i].facing === facingDir) {
+							hdConstraints.video.mandatory.sourceId = sources[i].id;
 							break;
 						}
 					}
